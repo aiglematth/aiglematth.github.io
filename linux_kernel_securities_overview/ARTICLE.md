@@ -38,8 +38,11 @@ The Linux kernel is arguably the most widely used kernel globally, particularly 
 ASLR (Address Space Layout Randomization) involves randomizing the base address of certain segments during the execution of classical software. In this context, addresses for the stack, libraries, and heap are randomized with each execution. KASLR (Kernel Address Space Layout Randomization) functions similarly, but it is specifically applied to the kernel. With each boot, ASLR is applied on the kernel, ensuring a randomized address space for enhanced security. More technically, the ASLR is applied during the following chain : 
 
 - [Select kernel region to randomize](https://github.com/torvalds/linux/blob/88035e5694a86a7167d490bb95e9df97a9bb162b/arch/x86/mm/kaslr.c#L48)
+![](images/kaslr_select.png)
 - [Init a PRNG (pseudo-random number generator)](https://github.com/torvalds/linux/blob/88035e5694a86a7167d490bb95e9df97a9bb162b/arch/x86/mm/kaslr.c#L116)
+![](images/kaslr_init_prng.png)
 - [Randomize](https://github.com/torvalds/linux/blob/88035e5694a86a7167d490bb95e9df97a9bb162b/arch/x86/mm/kaslr.c#L129)
+![](images/kaslr_randomize_regions.png)
 
 #### How to break it ?
 
@@ -59,8 +62,11 @@ The widely recognized stack canary is a value placed between the stack variables
 | function stack frame |
 
 In the kernel codebase, we can find how the cookie is implemented through the following pieces of code :
+
 - [Avoid stack overflow from functions regarding zero terminated buffers](https://github.com/torvalds/linux/blob/88035e5694a86a7167d490bb95e9df97a9bb162b/include/linux/stackprotector.h#L10)
+![](images/cookie_avoid_string_overflows.png)
 - [Init stack cookie value](https://github.com/torvalds/linux/blob/88035e5694a86a7167d490bb95e9df97a9bb162b/arch/x86/include/asm/stackprotector.h#L50)
+![](images/cookie_init.png)
 
 #### How to break it ?
 
@@ -73,7 +79,9 @@ Once again, to circumvent this mitigation, it is necessary to exploit a data lea
 SMAP (Supervisor Mode Access Prevention) is a security feature executed with elevated privileges, such as ring 0, to prevent reading or writing to pages marked with lower privileges, such as ring 3. Technically, it utilizes a bit in the CR4 register and the page tables to manage the activation of this security measure and the privileges assigned to the pages. SMEP is the same, but for execution. One more time, we can find this mitigation here in the kernel codebase:
 
 - [Activate the CR4 SMEP bit](https://github.com/torvalds/linux/blob/0dd3ee31125508cd67f7e7172247f05b7fd1753a/arch/x86/kernel/cpu/common.c#L353C30-L353C30)
+![](images/smep_on.png)
 - [Activate the CR4 SMAP bit](https://github.com/torvalds/linux/blob/0dd3ee31125508cd67f7e7172247f05b7fd1753a/arch/x86/kernel/cpu/common.c#L364C30-L364C30)
+![](images/smap_on.png)
 - [A bunch of functions to deactivate occasionally SMAP](https://github.com/torvalds/linux/blob/0dd3ee31125508cd67f7e7172247f05b7fd1753a/arch/x86/include/asm/smap.h)
 
 #### How to break it ?
@@ -91,6 +99,7 @@ KPTI (Kernel Page-Table Isolation) is a software mitigation that mandates the us
 To circumvent these security mitigations, two primary strategies can be employed. The simpler approach involves returning to user-land, as in traditional exploitation. Since the page table set is not switched at this point, executing code in user pages will result in an error. By handling this error, the kernel, during the exception process, will swap the page table sets. The second method involves utilizing the code section responsible for transitioning from kernel mode to user mode as a gadget to return.
 
 - [SISEGV method justification](https://github.com/torvalds/linux/blob/0dd3ee31125508cd67f7e7172247f05b7fd1753a/arch/x86/entry/entry_64.S#L599)
+![](images/sigsegv_trampoline_justification.png)
 
 ## Conclusion
 
