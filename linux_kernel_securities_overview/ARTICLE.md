@@ -17,7 +17,7 @@ This article provides a concise overview of key security measures in the Linux k
     - [Kernel stack-canary](#kernel-stack-canary)
       - [How it works ?](#how-it-works--1)
       - [How to break it ?](#how-to-break-it--1)
-    - [Supervisor Mode (Access|Execution) Prevention](#supervisor-mode-accessexecution-prevention)
+    - [Supervisor Mode (Access\|Execution) Prevention](#supervisor-mode-accessexecution-prevention)
       - [How it works ?](#how-it-works--2)
       - [How to break it ?](#how-to-break-it--2)
     - [Kernel Page Table Isolation](#kernel-page-table-isolation)
